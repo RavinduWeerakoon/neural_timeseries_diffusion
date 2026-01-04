@@ -5,6 +5,7 @@ import torch
 import xarray as xr
 from scipy import io
 from torch.utils.data.dataset import Dataset
+from dataset_utils.datasets.seed_iv import SeedIVDataset
 
 from ntd.utils.utils import standardize_array
 
@@ -187,6 +188,18 @@ class TychoUnconditionalDataset(Dataset):
     def __len__(self):
         return len(self.array)
 
+class SEED_IV_DIF(SeedIVDataset):
+
+    def __init__(self, root_dir, sessions = None, subjects = None, channels = None, sequence_length = 200, stride = 50, transform = None, target_transform = None, preload_small_files = True, small_file_threshold_mb = 100, use_h5py = None, cache_size = 1000, normalize_channels = True, overlap_sequences = True, return_subject_info = False, fixed_channel_means = None, fixed_channel_stds = None):
+        super().__init__(root_dir, sessions, subjects, channels, sequence_length, stride, transform, target_transform, preload_small_files, small_file_threshold_mb, use_h5py, cache_size, normalize_channels, overlap_sequences, return_subject_info, fixed_channel_means, fixed_channel_stds)
+
+    def __getitem__(self, idx):
+        sig, cond = super().__getitem__(idx)
+        return_dict = {}
+        return_dict["signal"] = sig
+        if cond is not None:
+            return_dict["cond"] = cond
+        return return_dict
 
 class NER_BCI(Dataset):
     """
