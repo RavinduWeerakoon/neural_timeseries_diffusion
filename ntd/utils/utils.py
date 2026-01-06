@@ -9,6 +9,7 @@ from einops import rearrange
 from omegaconf import OmegaConf as OC
 from scipy import signal
 from sklearn.metrics import f1_score
+from hydra.core.hydra_config import HydraConfig
 
 ### Util functions
 
@@ -434,7 +435,8 @@ def save_pickle(obj, file_path):
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
     if os.path.exists(file_path):
-        raise FileExistsError(f"{file_path} already exists!")
+        print(f"Warning: {file_path} already exists! Overwriting.")
+        # raise FileExistsError(f"{file_path} already exists!")
 
     with open(file_path, "wb") as f:
         pickle.dump(obj, f)
@@ -523,7 +525,16 @@ def config_saver(
             run.finish()
 
     # save locally
-    if not (local_path is None or local_path == ""):
+    if local_path is None:
+        try:
+            output_dir = HydraConfig.get().runtime.output_dir
+        except Exception:
+            output_dir = os.getcwd()
+            
+        print(f"DEBUG: Saving to output_dir: {os.path.join(output_dir, filename)}")
+        save_pickle(file, os.path.join(output_dir, filename))
+    elif local_path != "":
+        print(f"DEBUG: Saving to local_path: {os.path.join(local_path, experiment, f'{tag}_{filename}')}")
         save_pickle(file, os.path.join(local_path, experiment, f"{tag}_{filename}"))
 
 

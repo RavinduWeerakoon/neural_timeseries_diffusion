@@ -23,6 +23,7 @@ from ntd.datasets import (
     NER_BCI,
     TychoConditionalDataset,
     TychoUnconditionalDataset,
+    SEED_IV_DIF,
     load_ajile_data,
     load_ecog_data,
 )
@@ -227,6 +228,12 @@ def init_dataset(cfg):
         )
         test_data_set = Subset(test_data_set, list(range(len(test_data_set))))
         created_train_test_split = True
+    elif cfg.dataset.self == "seed_iv":
+        data_set = SEED_IV_DIF(
+            root_dir=cfg.dataset.filepath,
+            sequence_length=cfg.dataset.signal_length,
+            channels=cfg.dataset.channels,
+        )
     else:
         raise NotImplementedError
 
@@ -439,6 +446,8 @@ def generate_samples_wrapper(cfg, diffusion, dataset):
         else cfg.generate_samples.num_samples
     )
 
+    log.info(f"Starting generation of {num_samples} samples with batch size {cfg.generate_samples.batch_size}. This may take a few minutes...")
+
     try:
         cond = torch.stack([dic["cond"] for dic in dataset])[:num_samples]
         cond = cond.to(diffusion.device)
@@ -453,8 +462,14 @@ def generate_samples_wrapper(cfg, diffusion, dataset):
         cond=cond,
     )
 
+    # Save samples and conditions
+    save_dict = {
+        "samples": samples,
+        "cond": cond.cpu() if cond is not None else None
+    }
+
     config_saver(
-        file=samples,
+        file=save_dict,
         filename="samples.pkl",
         cfg=cfg,
     )

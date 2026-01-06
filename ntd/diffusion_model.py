@@ -2,6 +2,7 @@ import logging
 
 import torch
 import torch.nn as nn
+from tqdm import tqdm
 
 log = logging.getLogger(__name__)
 
@@ -253,7 +254,7 @@ class Trainer:
 
     def train_epoch(self):
         batchwise_losses = []
-        for batch in self.data_loader:
+        for batch in tqdm(self.data_loader, desc="Training Epoch"):
             sig_batch = batch["signal"]
             batch_size = sig_batch.shape[0]
             sig_batch = sig_batch.to(self.model.device)

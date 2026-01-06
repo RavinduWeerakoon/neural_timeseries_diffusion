@@ -195,10 +195,19 @@ class SEED_IV_DIF(SeedIVDataset):
 
     def __getitem__(self, idx):
         sig, cond = super().__getitem__(idx)
+        
+        if not torch.is_tensor(sig):
+            sig = torch.from_numpy(sig).float()
+            
         return_dict = {}
         return_dict["signal"] = sig
-        if cond is not None:
-            return_dict["cond"] = cond
+        
+        # One-hot encode condition (4 classes)
+        label = int(cond)
+        cond_tensor = torch.zeros(4, sig.shape[1])
+        cond_tensor[label, :] = 1.0
+        return_dict["cond"] = cond_tensor
+        
         return return_dict
 
 class NER_BCI(Dataset):
