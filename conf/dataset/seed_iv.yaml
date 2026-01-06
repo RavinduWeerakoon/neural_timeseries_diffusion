@@ -1,5 +1,5 @@
 self: seed_iv
-filepath: "/home/ravindu/fyp/seed_iv_h5"
+filepath: "/kaggle/input/seed-iv"
 signal_length: 800
 channels: null # Use default 12 key channels
 train_test_split: 0.8
